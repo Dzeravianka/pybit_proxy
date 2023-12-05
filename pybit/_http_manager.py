@@ -78,6 +78,7 @@ class _V5HTTPManager:
     referral_id: bool = field(default=None)
     record_request_time: bool = field(default=False)
     return_response_headers: bool = field(default=False)
+    proxies: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         subdomain = SUBDOMAIN_TESTNET if self.testnet else SUBDOMAIN_MAINNET
@@ -269,7 +270,10 @@ class _V5HTTPManager:
 
             # Attempt the request.
             try:
-                s = self.client.send(r, timeout=self.timeout)
+                if self.proxies:
+                    s = self.client.send(r, timeout=self.timeout, proxies=self.proxies)
+                else:
+                    s = self.client.send(r, timeout=self.timeout)
 
             # If requests fires an error, retry.
             except (
